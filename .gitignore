@@ -5,3 +5,4 @@
 /dbs/
 /data/
 /whoscored.egg-info/
+*.pyc
