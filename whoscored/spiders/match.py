@@ -46,7 +46,7 @@ class MatchSpider(CrawlSpider):
                 data = re.sub(r',,', r',null,', data)
                 data = re.sub(r'"', r'\"', data)
                 data = re.sub(r"\\'", r"'", data)
-                data = re.sub(r',\]', r',null\]', data)
+                data = re.sub(r',]', r',null]', data)
                 data = re.sub(r"'(.*?)'(\s*[,\]])", r'"\1"\2', data)
 
             path = "data/" + str(self.match_id) + "/"

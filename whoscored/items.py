@@ -27,3 +27,11 @@ class Player(Item):
     known_name = Field()
     age = Field()
     current_team = Field()
+
+
+class Fixture(Item):
+    id = Field()
+    home_team = Field()
+    away_team = Field()
+    date = Field()
+    stage = Field()
