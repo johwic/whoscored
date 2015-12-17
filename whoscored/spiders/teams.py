@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-import scrapy
-import re
-import json
-from whoscored.items import Team
+from scrapy import Spider
 from scrapy.http import Request
+from whoscored.items import Team
+from whoscored.utils import Utils
+import json
 
 
-class TeamsSpider(scrapy.Spider):
+class TeamsSpider(Spider):
     name = "teams"
     allowed_domains = ["whoscored.com"]
 
@@ -23,12 +23,7 @@ class TeamsSpider(scrapy.Spider):
         return requests
 
     def parse(self, response):
-        teams = re.sub(r',,', r',null,', response.body)
-        teams = re.sub(r',,', r',null,', teams)
-        teams = re.sub(r'"', r'\"', teams)
-        teams = re.sub(r"\\'", r"'", teams)
-        teams = re.sub(r',]', r',null]', teams)
-        teams = re.sub(r"'(.*?)'(\s*[,\]])", r'"\1"\2', teams)
+        teams = Utils.parse_json(response.body)
         teams = json.loads(teams)
 
         for team in teams:

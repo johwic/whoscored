@@ -6,7 +6,6 @@ import json
 
 
 class PlayerSpider(Spider):
-
     name = "player"
     player_id = None
     allowed_domains = ["whoscored.com"]
@@ -19,7 +18,7 @@ class PlayerSpider(Spider):
         yield Request(url="http://www.whoscored.com/Players/" + str(self.player_id))
 
     def parse(self, response):
-        data = response.xpath('//script[contains(., "var currentTeamId")]/text()')\
+        data = response.xpath('//script[contains(., "var currentTeamId")]/text()') \
             .re_first(r"var currentTeamId = (\d*?);")
         try:
             team_id = int(data)
@@ -38,9 +37,13 @@ class PlayerSpider(Spider):
             self.logger.warning("Age not found")
             age = 0
 
+        model_last_mode = response.xpath('//script[contains(., "Model-Last-Mode")]/text()').re_first(
+            r"'Model-Last-Mode': '(.*?)' }")
+
         request = Request(
             url="http://www.whoscored.com/StatisticsFeed/1/GetPlayerStatistics?category=summary&subcategory=all&statsAccumulationType=0&isCurrent=true&playerId=" + self.player_id + "&teamIds=&matchId=&stageId=&tournamentOptions=&sortBy=Rating&sortAscending=&age=&ageComparisonType=&appearances=&appearancesComparisonType=&field=Overall&nationality=&positionOptions=&timeOfTheGameEnd=&timeOfTheGameStart=&isMinApp=false&page=&includeZeroValues=true&numberOfPlayersToPick=",
-            headers={'X-Requested-With': 'XMLHttpRequest', 'Host': 'www.whoscored.com'},
+            headers={'X-Requested-With': 'XMLHttpRequest', 'Host': 'www.whoscored.com',
+                     'Model-Last-Mode': model_last_mode},
             callback=self.parse_player
         )
 

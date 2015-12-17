@@ -6,16 +6,17 @@ from scrapy.http import Request
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.exceptions import CloseSpider
 from scrapy.linkextractors import LinkExtractor
+from whoscored.utils import Utils
 from whoscored.items import Player
 
 
 class MatchSpider(CrawlSpider):
-
     name = "match"
     match_id = None
     allowed_domains = ["whoscored.com"]
     rules = (
-        Rule(LinkExtractor(allow=(r"http://www.whoscored.com/Matches/\d+/MatchReport/.*",)), callback="parse_match_stats"),
+        Rule(LinkExtractor(allow=(r"http://www.whoscored.com/Matches/\d+/MatchReport/.*",)),
+             callback="parse_match_stats"),
     )
 
     def __init__(self, match_id, *args, **kwargs):
@@ -42,12 +43,7 @@ class MatchSpider(CrawlSpider):
             data = data.group(1)
 
             if is_array:
-                data = re.sub(r',,', r',null,', data)
-                data = re.sub(r',,', r',null,', data)
-                data = re.sub(r'"', r'\"', data)
-                data = re.sub(r"\\'", r"'", data)
-                data = re.sub(r',]', r',null]', data)
-                data = re.sub(r"'(.*?)'(\s*[,\]])", r'"\1"\2', data)
+                data = Utils.parse_json(data)
 
             path = "data/" + str(self.match_id) + "/"
             filename = path + needle + ".json"
@@ -69,22 +65,12 @@ class MatchSpider(CrawlSpider):
         return
 
     def parse_match_stats(self, response):
-        match_data = response.xpath('//script[contains(., "var matchStats")]/text()').extract()
+        match_data = response.xpath('//script[contains(., "var matchStats")]/text()').re_first(
+            r"matchStats = ([\w\W]*?);")
 
-        if len(match_data) == 0:
-            self.logger.warning("No matchStats found.")
-            return
+        if match_data:
+            data = Utils.parse_json(match_data)
 
-        data = re.search(r"matchStats = ([\w\W]*?);", match_data[0])
-
-        if data:
-            data = re.sub(r',,', r',null,', data.group(1))
-            data = re.sub(r',,', r',null,', data)
-            data = re.sub(r'"', r'\"', data)
-            data = re.sub(r"\\'", r"'", data)
-            data = re.sub(r',]', r',null]', data)
-            data = re.sub(r"'(.*?)'(\s*[,\]])", r'"\1"\2', data)
-        
             path = "data/" + str(self.match_id) + "/"
             filename = path + "matchStats.json"
             try:
@@ -95,6 +81,8 @@ class MatchSpider(CrawlSpider):
 
             with open(filename, 'wb') as f:
                 f.write(data.encode('utf8'))
+        else:
+            self.logger.warning("No matchStats found.")
 
         return
         # players = json.loads(data)
@@ -109,7 +97,7 @@ class MatchSpider(CrawlSpider):
         #     self.logger.warning("No players found.")
 
     def parse_player(self, response):
-        data = response.xpath('//script[contains(., "var currentTeamId")]/text()')\
+        data = response.xpath('//script[contains(., "var currentTeamId")]/text()') \
             .re_first(r"var currentTeamId = (\d*?);")
         try:
             team_id = int(data)
