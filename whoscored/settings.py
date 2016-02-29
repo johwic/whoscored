@@ -29,6 +29,8 @@ DOWNLOAD_DELAY=2
 #CONCURRENT_REQUESTS_PER_DOMAIN=16
 #CONCURRENT_REQUESTS_PER_IP=16
 
+DOWNLOADER_CLIENTCONTEXTFACTORY = 'whoscored.contexts.CustomContextFactory'
+
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED=False
 

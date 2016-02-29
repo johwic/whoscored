@@ -15,7 +15,7 @@ class PlayerSpider(Spider):
         self.player_id = player_id
 
     def start_requests(self):
-        yield Request(url="http://www.whoscored.com/Players/" + str(self.player_id))
+        yield Request(url="https://www.whoscored.com/Players/" + str(self.player_id))
 
     def parse(self, response):
         data = response.xpath('//script[contains(., "var currentTeamId")]/text()') \
@@ -41,7 +41,7 @@ class PlayerSpider(Spider):
             r"'Model-Last-Mode': '(.*?)' }")
 
         request = Request(
-            url="http://www.whoscored.com/StatisticsFeed/1/GetPlayerStatistics?category=summary&subcategory=all&statsAccumulationType=0&isCurrent=true&playerId=" + self.player_id + "&teamIds=&matchId=&stageId=&tournamentOptions=&sortBy=Rating&sortAscending=&age=&ageComparisonType=&appearances=&appearancesComparisonType=&field=Overall&nationality=&positionOptions=&timeOfTheGameEnd=&timeOfTheGameStart=&isMinApp=false&page=&includeZeroValues=true&numberOfPlayersToPick=",
+            url="https://www.whoscored.com/StatisticsFeed/1/GetPlayerStatistics?category=summary&subcategory=all&statsAccumulationType=0&isCurrent=true&playerId=" + self.player_id + "&teamIds=&matchId=&stageId=&tournamentOptions=&sortBy=Rating&sortAscending=&age=&ageComparisonType=&appearances=&appearancesComparisonType=&field=Overall&nationality=&positionOptions=&timeOfTheGameEnd=&timeOfTheGameStart=&isMinApp=false&page=&includeZeroValues=true&numberOfPlayersToPick=",
             headers={'X-Requested-With': 'XMLHttpRequest', 'Host': 'www.whoscored.com',
                      'Model-Last-Mode': model_last_mode},
             callback=self.parse_player

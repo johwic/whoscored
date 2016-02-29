@@ -15,7 +15,7 @@ class MatchSpider(CrawlSpider):
     match_id = None
     allowed_domains = ["whoscored.com"]
     rules = (
-        Rule(LinkExtractor(allow=(r"http://www.whoscored.com/Matches/\d+/MatchReport/.*",)),
+        Rule(LinkExtractor(allow=(r"https://www.whoscored.com/Matches/\d+/MatchReport/.*",)),
              callback="parse_match_stats"),
     )
 
@@ -24,7 +24,7 @@ class MatchSpider(CrawlSpider):
         self.match_id = match_id
 
     def start_requests(self):
-        yield Request(url="http://www.whoscored.com/Matches/" + str(self.match_id) + "/Live/")
+        yield Request(url="https://www.whoscored.com/Matches/" + str(self.match_id) + "/Live/")
 
     def parse_start_url(self, response):
         needle = "matchCentreData"
@@ -117,7 +117,7 @@ class MatchSpider(CrawlSpider):
             age = 0
         player_id = response.meta['id']
         request = Request(
-            url="http://www.whoscored.com/StatisticsFeed/1/GetPlayerStatistics?category=summary&subcategory=all&statsAccumulationType=0&isCurrent=true&playerId=" + str(player_id) + "&teamIds=&matchId=&stageId=&tournamentOptions=&sortBy=Rating&sortAscending=&age=&ageComparisonType=&appearances=&appearancesComparisonType=&field=Overall&nationality=&positionOptions=&timeOfTheGameEnd=&timeOfTheGameStart=&isMinApp=false&page=&includeZeroValues=true&numberOfPlayersToPick=",
+            url="https://www.whoscored.com/StatisticsFeed/1/GetPlayerStatistics?category=summary&subcategory=all&statsAccumulationType=0&isCurrent=true&playerId=" + str(player_id) + "&teamIds=&matchId=&stageId=&tournamentOptions=&sortBy=Rating&sortAscending=&age=&ageComparisonType=&appearances=&appearancesComparisonType=&field=Overall&nationality=&positionOptions=&timeOfTheGameEnd=&timeOfTheGameStart=&isMinApp=false&page=&includeZeroValues=true&numberOfPlayersToPick=",
             headers={'X-Requested-With': 'XMLHttpRequest', 'Host': 'www.whoscored.com'},
             callback=self.parse_player2
         )

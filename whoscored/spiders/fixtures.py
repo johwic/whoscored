@@ -9,7 +9,7 @@ import json
 class FixtureSpider(Spider):
     name = "fixtures"
     arg_list = None
-    base_url = "http://www.whoscored.com/Regions/{}/Tournaments/{}/Seasons/{}/Stages/{}"
+    base_url = "https://www.whoscored.com/Regions/{}/Tournaments/{}/Seasons/{}/Stages/{}"
     allowed_domains = ["whoscored.com"]
 
     def __init__(self, arg_list, *args, **kwargs):
@@ -31,7 +31,7 @@ class FixtureSpider(Spider):
             r"'Model-Last-Mode': '(.*?)' }")
 
         request = Request(
-            url="http://www.whoscored.com/tournamentsfeed/{}/Fixtures?d={}&isAggregate=false".format(self.arg_list[3],
+            url="https://www.whoscored.com/tournamentsfeed/{}/Fixtures?d={}&isAggregate=false".format(self.arg_list[3],
                                                                                                      self.arg_list[4]),
             headers={'X-Requested-With': 'XMLHttpRequest', 'Host': 'www.whoscored.com',
                      'Model-Last-Mode': model_last_mode},

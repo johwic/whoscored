@@ -19,7 +19,7 @@ class SquadSpider(Spider):
 
     def start_requests(self):
         if self.team_id is not None:
-            yield Request(url="http://www.whoscored.com/Teams/" + self.team_id)
+            yield Request(url="https://www.whoscored.com/Teams/" + self.team_id)
         elif self.stage_id is not None:
             raise CloseSpider("Stage id not supported")
         else:
@@ -30,7 +30,7 @@ class SquadSpider(Spider):
             r"'Model-Last-Mode': '(.*?)' }")
 
         request = Request(
-            url="http://www.whoscored.com/StatisticsFeed/1/GetPlayerStatistics?category=summary&subcategory=all&statsAccumulationType=0&isCurrent=true&playerId=&teamIds=" + self.team_id + "&matchId=&stageId=&tournamentOptions=&sortBy=Rating&sortAscending=&age=&ageComparisonType=&appearances=&appearancesComparisonType=&field=Overall&nationality=&positionOptions=&timeOfTheGameEnd=&timeOfTheGameStart=&isMinApp=false&page=&includeZeroValues=true&numberOfPlayersToPick=",
+            url="https://www.whoscored.com/StatisticsFeed/1/GetPlayerStatistics?category=summary&subcategory=all&statsAccumulationType=0&isCurrent=true&playerId=&teamIds=" + self.team_id + "&matchId=&stageId=&tournamentOptions=&sortBy=Rating&sortAscending=&age=&ageComparisonType=&appearances=&appearancesComparisonType=&field=Overall&nationality=&positionOptions=&timeOfTheGameEnd=&timeOfTheGameStart=&isMinApp=false&page=&includeZeroValues=true&numberOfPlayersToPick=",
             headers={'X-Requested-With': 'XMLHttpRequest', 'Host': 'www.whoscored.com',
                      'Model-Last-Mode': model_last_mode},
             callback=self.parse_player

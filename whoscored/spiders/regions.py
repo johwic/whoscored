@@ -7,7 +7,7 @@ class RegionsSpider(Spider):
     name = "regions"
     allowed_domains = ["whoscored.com"]
     start_urls = (
-        'http://www.whoscored.com/',
+        'https://www.whoscored.com/',
     )
 
     def parse(self, response):
