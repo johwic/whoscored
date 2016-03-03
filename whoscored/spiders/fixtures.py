@@ -2,25 +2,33 @@
 from scrapy.http import Request
 from scrapy.spiders import Spider
 from whoscored.items import Fixture
-from whoscored.utils import Utils
+from whoscored.utils import Utils, Url
 import json
 
 
 class FixtureSpider(Spider):
     name = "fixtures"
-    arg_list = None
-    base_url = "https://www.whoscored.com/Regions/{}/Tournaments/{}/Seasons/{}/Stages/{}"
     allowed_domains = ["whoscored.com"]
 
-    def __init__(self, arg_list, *args, **kwargs):
+    def __init__(self, region, tournament, season, stage, dates=None, is_aggregate='false', *args, **kwargs):
         super(FixtureSpider, self).__init__(*args, **kwargs)
-        self.arg_list = arg_list.split(',')
+        self.region = region
+        self.tournament = tournament
+        self.season = season
+        self.stage = stage
+        self.dates = dates
+        self.is_aggregate = is_aggregate
 
     def start_requests(self):
-        yield Request(url=self.base_url.format(self.arg_list[0], self.arg_list[1], self.arg_list[2], self.arg_list[3]))
+        yield Request(url=Url.get('stage', {
+            'r': self.region,
+            't': self.tournament,
+            's': self.season,
+            'id': self.stage
+        }))
 
     def parse(self, response):
-        if len(self.arg_list) == 4:
+        if self.dates is None:
             fixtures = response.xpath('//script[contains(., "DataStore.prime(\'stagefixtures\'")]/text()').re_first(
                 r"\$\.extend\(.*?\), ([\w\W]*?)\);")
             if fixtures:
@@ -29,16 +37,17 @@ class FixtureSpider(Spider):
 
         model_last_mode = response.xpath('//script[contains(., "Model-Last-Mode")]/text()').re_first(
             r"'Model-Last-Mode': '(.*?)' }")
+        requests = []
 
-        request = Request(
-            url="https://www.whoscored.com/tournamentsfeed/{}/Fixtures?d={}&isAggregate=false".format(self.arg_list[3],
-                                                                                                     self.arg_list[4]),
-            headers={'X-Requested-With': 'XMLHttpRequest', 'Host': 'www.whoscored.com',
+        for d in self.dates.split(','):
+            requests.append(Request(
+                url=Url.get('stagefixtures', {'stageId': self.stage, 'd': d, 'isAggregate': self.is_aggregate}),
+                headers={'X-Requested-With': 'XMLHttpRequest', 'Host': 'www.whoscored.com',
                      'Model-Last-Mode': model_last_mode},
-            callback=self.parse_fixtures
-        )
+                callback=self.parse_fixtures
+            ))
 
-        return request
+        return requests
 
     def parse_fixtures(self, response):
         data = response.body
@@ -51,7 +60,7 @@ class FixtureSpider(Spider):
 
         for record in fixtures:
             ret = Fixture()
-            ret['stage'] = self.arg_list[3]
+            ret['stage'] = self.stage
             ret['id'] = record[0]
             ret['status'] = record[1]
             ret['start_date'] = record[2]

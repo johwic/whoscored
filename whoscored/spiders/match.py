@@ -7,7 +7,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.exceptions import CloseSpider
 from scrapy.linkextractors import LinkExtractor
 from whoscored.utils import Utils
-from whoscored.items import Player
+from whoscored.items import Player, MatchData, Fixture
 
 
 class MatchSpider(CrawlSpider):
@@ -29,32 +29,24 @@ class MatchSpider(CrawlSpider):
     def parse_start_url(self, response):
         needle = "matchCentreData"
         is_array = False
-        match_data = response.xpath('//script[contains(., "var ' + needle + '")]/text()').extract()
-        if len(match_data) == 0:
+        data = response.xpath('//script[contains(., "var ' + needle + '")]/text()').re_first(needle + r" = ([\w\W]*?);")
+        if len(data) == 0:
             needle = "initialMatchDataForScrappers"
             is_array = True
-            match_data = response.xpath('//script[contains(., "var ' + needle + '")]/text()').extract()
-            if len(match_data) == 0:
+            data = response.xpath('//script[contains(., "var ' + needle + '")]/text()').re_first(needle + r" = ([\w\W]*?);")
+            if len(data) == 0:
                 raise CloseSpider("Match data not found")
 
-        data = re.search(needle + r" = ([\w\W]*?);", match_data[0])
-
-        if data:
-            data = data.group(1)
+        if len(data):
 
             if is_array:
                 data = Utils.parse_json(data)
 
-            path = "data/" + str(self.match_id) + "/"
-            filename = path + needle + ".json"
-            try:
-                os.makedirs(path)
-            except OSError:
-                if not os.path.isdir(path):
-                    raise
+            match_data = MatchData()
+            match_data['id'] = self.match_id
+            match_data['match_data'] = data
 
-            with open(filename, 'wb') as f:
-                f.write(data.encode('utf8'))
+            return match_data
 
         else:
             raise CloseSpider("Match data not found")

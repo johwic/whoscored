@@ -49,3 +49,9 @@ class Fixture(Item):
     result = Field()
     is_international = Field()
     is_opta = Field()
+
+
+class MatchData(Item):
+    id = Field()
+    match_data = Field()
+    match_header = Fixture()

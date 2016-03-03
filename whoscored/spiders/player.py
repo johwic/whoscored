@@ -2,6 +2,7 @@
 from scrapy.http import Request
 from scrapy.spiders import Spider
 from whoscored.items import Player
+from whoscored.utils import Url
 import json
 
 
@@ -41,7 +42,13 @@ class PlayerSpider(Spider):
             r"'Model-Last-Mode': '(.*?)' }")
 
         request = Request(
-            url="https://www.whoscored.com/StatisticsFeed/1/GetPlayerStatistics?category=summary&subcategory=all&statsAccumulationType=0&isCurrent=true&playerId=" + self.player_id + "&teamIds=&matchId=&stageId=&tournamentOptions=&sortBy=Rating&sortAscending=&age=&ageComparisonType=&appearances=&appearancesComparisonType=&field=Overall&nationality=&positionOptions=&timeOfTheGameEnd=&timeOfTheGameStart=&isMinApp=false&page=&includeZeroValues=true&numberOfPlayersToPick=",
+            url=Url.get('player-statistics', {
+                'category': 'summary', 'subcategory': 'all', 'statsAccumulationType': '0', 'isCurrent': 'true',
+                'playerId': self.player_id, 'teamIds': '', 'matchId': '', 'stageId': '', 'tournamentOptions': '',
+                'sortBy': 'Rating', 'sortAscending': '', 'age': '', 'ageComparisonType': '', 'appearances': '',
+                'appearancesComparisonType': '', 'field': 'Overall', 'nationality': '', 'positionOptions': '',
+                'timeOfTheGameEnd': '', 'timeOfTheGameStart': '', 'isMinApp': 'false', 'page': '',
+                'includeZeroValues': 'true', 'numberOfPlayersToPick': ''}),
             headers={'X-Requested-With': 'XMLHttpRequest', 'Host': 'www.whoscored.com',
                      'Model-Last-Mode': model_last_mode},
             callback=self.parse_player
